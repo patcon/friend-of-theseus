@@ -5,8 +5,8 @@
   <title>Ship of Theseus: Friend Edition</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- ✅ Use a super lightweight CSS theme -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.min.css">
+  <!-- Water.css -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.min.css" />
 
   <style>
     body {
@@ -30,17 +30,37 @@
   <label for="last-seen">Last Time You Saw Them</label>
   <input type="date" id="last-seen" />
 
-  <button onclick="calculate()">How much have they changed?</button>
-
   <div class="result" id="result"></div>
 
   <script>
-    function calculate() {
-      const name = document.getElementById("friend-name").value || "Your friend";
-      const lastSeenStr = document.getElementById("last-seen").value;
+    const nameInput = document.getElementById("friend-name");
+    const dateInput = document.getElementById("last-seen");
+    const resultDiv = document.getElementById("result");
 
+    // Restore from URL parameters
+    const params = new URLSearchParams(location.search);
+    if (params.has("name")) nameInput.value = decodeURIComponent(params.get("name"));
+    if (params.has("date")) dateInput.value = params.get("date");
+
+    // Helper: update URL with current values
+    function updateURL() {
+      const name = encodeURIComponent(nameInput.value || "");
+      const date = dateInput.value;
+      const newParams = new URLSearchParams();
+      if (name) newParams.set("name", name);
+      if (date) newParams.set("date", date);
+      const newURL = `${location.pathname}?${newParams.toString()}`;
+      history.replaceState(null, "", newURL);
+    }
+
+    // Helper: compute % new atoms
+    function updateResult() {
+      updateURL();
+
+      const name = nameInput.value || "Your friend";
+      const lastSeenStr = dateInput.value;
       if (!lastSeenStr) {
-        document.getElementById("result").textContent = "Please pick a date!";
+        resultDiv.textContent = "Please pick a date!";
         return;
       }
 
@@ -53,12 +73,19 @@
       const fractionNew = 1 - fractionRemaining;
       const percentNew = (fractionNew * 100).toFixed(2);
 
-      document.getElementById("result").innerHTML = `
+      resultDiv.innerHTML = `
         <strong>${name}</strong> is now<br>
         <strong>${percentNew}%</strong> new atoms since you last saw them.<br><br>
         Still the same? You decide.
       `;
     }
+
+    // Auto-calculate when inputs change
+    nameInput.addEventListener("input", updateResult);
+    dateInput.addEventListener("input", updateResult);
+
+    // Trigger initial calculation
+    updateResult();
   </script>
 </body>
 </html>
