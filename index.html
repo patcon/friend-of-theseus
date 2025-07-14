@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ship of Theseus: Friend Edition</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- ✅ Use a super lightweight CSS theme -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.min.css">
+
+  <style>
+    body {
+      max-width: 600px;
+      margin: 2rem auto;
+    }
+    .result {
+      text-align: center;
+      font-size: 1.3rem;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Ship of Theseus: Friend Edition</h1>
+
+  <label for="friend-name">Friend's Name</label>
+  <input type="text" id="friend-name" placeholder="e.g. Alex" />
+
+  <label for="last-seen">Last Time You Saw Them</label>
+  <input type="date" id="last-seen" />
+
+  <button onclick="calculate()">How much have they changed?</button>
+
+  <div class="result" id="result"></div>
+
+  <script>
+    function calculate() {
+      const name = document.getElementById("friend-name").value || "Your friend";
+      const lastSeenStr = document.getElementById("last-seen").value;
+
+      if (!lastSeenStr) {
+        document.getElementById("result").textContent = "Please pick a date!";
+        return;
+      }
+
+      const lambda = 0.0106; // decay constant for 98% turnover per year
+      const lastSeen = new Date(lastSeenStr);
+      const today = new Date();
+      const diffDays = (today - lastSeen) / (1000 * 60 * 60 * 24);
+
+      const fractionRemaining = Math.exp(-lambda * diffDays);
+      const fractionNew = 1 - fractionRemaining;
+      const percentNew = (fractionNew * 100).toFixed(2);
+
+      document.getElementById("result").innerHTML = `
+        <strong>${name}</strong> is now<br>
+        <strong>${percentNew}%</strong> new atoms since you last saw them.<br><br>
+        Still the same? You decide.
+      `;
+    }
+  </script>
+</body>
+</html>
